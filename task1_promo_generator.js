@@ -18,7 +18,7 @@ function* promoCodeGenerator(length = 8) {
     }
 }
 
-// 2. ІТЕРАТОР З ТАЙМАУТОМ
+// 2. ІТЕРАТОР З ТАЙМАУТОМ.
 async function runFlashSale(generator, timeoutInSeconds) {
     const timeoutMs = timeoutInSeconds * 1000; 
     const startTime = Date.now(); 
