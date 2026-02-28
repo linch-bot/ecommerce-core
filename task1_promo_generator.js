@@ -30,6 +30,7 @@ async function runFlashSale(generator, timeoutInSeconds) {
     for (const code of generator) {
         const currentTime = Date.now();
         
+        // Якщо поточний час мінус час старту більший за ліміт — зупинити.
         if (currentTime - startTime >= timeoutMs) {
             console.log(`\n[АКЦІЯ] Час вичерпано! Роздачу завершено.`);
             console.log(`Всього згенеровано кодів: ${generatedCount}`);
@@ -39,6 +40,7 @@ async function runFlashSale(generator, timeoutInSeconds) {
         console.log(`Згенерован код на знижку: ${code}`);
         generatedCount++;
 
+        //Робимо паузу в 0.5 секунд перед наступним кодом (щоб зімітувати реальне навантаження)
         await new Promise(resolve => setTimeout(resolve, 500));
     }
 }
