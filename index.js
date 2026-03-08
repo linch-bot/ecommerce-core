@@ -45,6 +45,7 @@ async function runFlashSale(generator, timeoutInSeconds) {
     }
 }
 
-const discountCodes = promoCodeGenerator(6); 
-
-runFlashSale(discountCodes, 3);
+module.exports = {
+    promoCodeGenerator,
+    runFlashSale
+};
