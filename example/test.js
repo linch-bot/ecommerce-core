@@ -1,7 +1,6 @@
-const core = require('../index.js');
+const core = require('ecommerce-core');
 
-console.log("=== ТЕСТ: Запуск ядра інтернет-магазину ===");
+console.log("=== TEST: E-commerce Core Initialization ===");
 
-// Викликаємо функції нашої бібліотеки
-const codes = core.promoCodeGenerator(5); 
-core.runFlashSale(codes, 2); 
+const codes = core.promoCodeGenerator(5);
+core.runFlashSale(codes, 2);
