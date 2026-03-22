@@ -6,43 +6,46 @@ function memoize(fn, options = {}) {
     const cache = new Map(); 
     const maxSize = options.maxSize || Infinity; 
     const maxAge = options.maxAge || 0; 
+
     return function (...args) {
         const key = JSON.stringify(args);
 
-        // 1. Перевіряємо чи є дані в кэше
         if (cache.has(key)) {
             const cachedData = cache.get(key);
             
-            // Перевіряємо чи дані не застаріли
+            // перевіряємо на старість кешу
             if (maxAge > 0 && (Date.now() - cachedData.timestamp > maxAge)) {
                 cache.delete(key);
             } else {
-                // оновлюємо позицію елемента (видаляємо та ставимо в кінець)
+                // Оюновлюємо позицію в кэше для LRU
                 if (maxSize !== Infinity) {
                     cache.delete(key);
                     cache.set(key, cachedData);
                 }
-                console.log(`[Кэш] Возвращаем сохраненный результат для: ${key}`);
+                console.log(`[Кэш] Повертаємо збережений результат для: ${key}`);
                 return cachedData.value;
             }
         }
 
-        // 2. Якщо даних немає, запускаємо реальну функцію
         const result = fn(...args);
 
-        // 3. коли кеш переповнений, видаляємо найстаріший елемент
+        // Політика очистки
         if (cache.size >= maxSize) {
-            const firstKey = cache.keys().next().value;
-            cache.delete(firstKey);
+            if (typeof options.customPolicy === 'function') {
+                options.customPolicy(cache);
+            } else {
+                // Самий старий елемент удаляємо
+                const firstKey = cache.keys().next().value;
+                cache.delete(firstKey);
+            }
         }
 
-        // 4. Зберігаємо свіжий результат у кэш
         cache.set(key, {
             value: result,
             timestamp: Date.now()
         });
 
-        console.log(`[Вычисление] Считаем с нуля и сохраняем для: ${key}`);
+        console.log(`[Обчислення] Рахуємо з нуля і зберігаємо для: ${key}`);
         return result;
     };
 }
