@@ -42,3 +42,22 @@ async function runAsyncAwaitDemo() {
     }
 }
 setTimeout(runAsyncAwaitDemo, 1000); // Запускаемо пізніше щоб не змішати вивід з Callback-версією
+// --- ДЕМО 4: AbortController ---
+async function runAbortDemo() {
+    console.log("\n3. Тест AbortController (повинен відмінитись через 100мс...)");
+    const controller = new AbortController();
+    
+    // Запускаемо довгий процес (1000мс)
+    const promise = asyncMapPromise([99, 98, 97], fetchOrderPromise, { signal: controller.signal });
+    
+    // через 100мс відміняємо
+    setTimeout(() => controller.abort(), 100);
+
+    try {
+        const res = await promise;
+        console.log("Результат:", res);
+    } catch (err) {
+        console.log("🛑 Успішно відмінено! Причина:", err.message);
+    }
+}
+setTimeout(runAbortDemo, 2500);
