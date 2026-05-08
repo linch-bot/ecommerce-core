@@ -3,16 +3,30 @@
  */
 
 class AuthProxy {
-    // Головний метод, заміняє fetch/axios
-    async makeRequest(url, options = {}) {
-        // (Logging & Monitoring)
-        console.log(`📝 [Лог] Отправка запроса: ${options.method || 'GET'} ${url}`);
-
-        // Симуляція додавання токена до заголовків
-        return this._simulateNetworkRequest(url, options.headers || {});
+    constructor() {
+        this.authMethod = 'API_KEY'; // Метод за замовчуванням
+        this.credentials = {};
     }
 
-    // Імітація запиту(щоб працював без реального сервера)
+    // Головний метод, заміняє fetch/axios
+    async makeRequest(url, options = {}) {
+        // Inject Credentials
+        const headers = { ...options.headers };
+
+        if (this.authMethod === 'API_KEY') {
+            headers['X-API-Key'] = this.credentials.apiKey;
+        } else if (this.authMethod === 'JWT') {
+            headers['Authorization'] = `Bearer ${this.credentials.token}`;
+        }
+
+        // (Logging & Monitoring)
+        console.log(`📝 [Лог] Відправка запросу: ${options.method || 'GET'} ${url}`);
+
+        // Симуляція додавання токена до заголовків
+        return this._simulateNetworkRequest(url, headers);
+    }
+
+    // Симуляція відповіді від сервера (щоб код працював без інтернету)
     async _simulateNetworkRequest(url, headers) {
         return new Promise((resolve) => {
             setTimeout(() => {
