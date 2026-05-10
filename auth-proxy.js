@@ -12,7 +12,7 @@ class AuthProxy {
     setAuthStrategy(method, credentials) {
         this.authMethod = method;
         this.credentials = credentials;
-        console.log(`[Прокси] Стратегия изменена на: ${method}`);
+        console.log(`[Прокси] Стратегія змінена на: ${method}`);
     }
 
     // Головний метод, заміняє fetch/axios
