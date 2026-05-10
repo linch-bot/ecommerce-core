@@ -8,18 +8,33 @@ class AuthProxy {
         this.credentials = {};
     }
 
+    // Динамічне змінення стратегії авторизації
+    setAuthStrategy(method, credentials) {
+        this.authMethod = method;
+        this.credentials = credentials;
+        console.log(`[Прокси] Стратегия изменена на: ${method}`);
+    }
+
     // Головний метод, заміняє fetch/axios
     async makeRequest(url, options = {}) {
         // Inject Credentials
         const headers = { ...options.headers };
 
-        if (this.authMethod === 'API_KEY') {
-            headers['X-API-Key'] = this.credentials.apiKey;
-        } else if (this.authMethod === 'JWT') {
-            headers['Authorization'] = `Bearer ${this.credentials.token}`;
+        switch (this.authMethod) {
+            case 'API_KEY':
+                headers['X-API-Key'] = this.credentials.apiKey;
+                break;
+            case 'JWT':
+                headers['Authorization'] = `Bearer ${this.credentials.token}`;
+                break;
+            case 'OAUTH':
+                headers['Authorization'] = `OAuth ${this.credentials.oauthToken}`;
+                break;
+            default:
+                throw new Error("Невідомий метод авторизації");
         }
 
-        // (Logging & Monitoring)
+        // Logging & Monitoring
         console.log(`📝 [Лог] Відправка запросу: ${options.method || 'GET'} ${url}`);
 
         // Симуляція додавання токена до заголовків
@@ -40,4 +55,4 @@ class AuthProxy {
     }
 }
 
-module.exports = AuthProxy;
+module.exports = AuthProxy;   
