@@ -2,10 +2,15 @@
  * TASK 8: Authentication Proxy
  */
 
-class AuthProxy {
+   class AuthProxy {
     constructor() {
         this.authMethod = 'API_KEY'; // Метод за замовчуванням
         this.credentials = {};
+
+        //  Rate Limiting (захист від спаму)
+        this.requestCount = 0;
+        this.lastResetTime = Date.now();
+        this.rateLimit = 5; // Макс 5 запросів в секунду
     }
 
     // Динамічне змінення стратегії авторизації
@@ -15,9 +20,37 @@ class AuthProxy {
         console.log(`[Прокси] Стратегія змінена на: ${method}`);
     }
 
+    //  перевірка лімітів (Rate Limiting)
+    _checkRateLimit() {
+        const now = Date.now();
+        if (now - this.lastResetTime > 1000) {
+            this.requestCount = 0;
+            this.lastResetTime = now;
+        }
+        if (this.requestCount >= this.rateLimit) {
+            throw new Error("Rate Limit Exceeded: Забагато запитів (макс 5/сек)!");
+        }
+        this.requestCount++;
+    }
+
+    // автообновлення токена (Automatic Token Renewal)
+    _renewTokenIfNeeded() {
+        if (this.authMethod === 'JWT' && this.credentials.expiresAt < Date.now()) {
+            console.log("⚠️ [Прокси] Токен минув. Виконую автоматичне оновлення (Renewal)...");
+            this.credentials.token = "new_fresh_jwt_token_999";
+            this.credentials.expiresAt = Date.now() + 3600000; // продовжуємо на 1 годину
+        }
+    }
+
     // Головний метод, заміняє fetch/axios
     async makeRequest(url, options = {}) {
-        // Inject Credentials
+        // 1. перевірка лімітів 
+        this._checkRateLimit();
+
+        // 2. Обновляємо токен, якщо потрібно
+        this._renewTokenIfNeeded();
+
+        // 3. Inject Credentials
         const headers = { ...options.headers };
 
         switch (this.authMethod) {
@@ -34,10 +67,10 @@ class AuthProxy {
                 throw new Error("Невідомий метод авторизації");
         }
 
-        // Logging & Monitoring
+        // 4. Logging & Monitoring
         console.log(`📝 [Лог] Відправка запросу: ${options.method || 'GET'} ${url}`);
 
-        // Симуляція додавання токена до заголовків
+        // 5. Симуляція реального походу в мережу
         return this._simulateNetworkRequest(url, headers);
     }
 
@@ -55,4 +88,4 @@ class AuthProxy {
     }
 }
 
-module.exports = AuthProxy;   
+module.exports = AuthProxy;
