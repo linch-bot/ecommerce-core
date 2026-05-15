@@ -3,39 +3,40 @@
  */
 
 function log(options = {}) {
-    const level = options.level || 'INFO'; // за замовчуванням INFO
+    const level = options.level || 'INFO'; 
 
     return function decorator(fn) {
         return function (...args) {
             const timestamp = new Date().toISOString();
             const name = fn.name || 'anonymousFunction';
+            const startTime = Date.now(); // час старту
 
             const printLog = (currentLevel, message, data) => {
-                // Conditional logging: якщо error, ігноруємо info
                 if (level === 'ERROR' && currentLevel !== 'ERROR') return;
                 
-                console.log(`[${timestamp}] [${currentLevel}] ${name} - ${message}`, data ? data : '');
+                const execTime = Date.now() - startTime; // підрахунок часу виконання
+                console.log(`[${timestamp}] [${currentLevel}] [${execTime}ms] ${name} - ${message}`, data ? data : '');
             };
 
-            printLog('INFO', 'Викликана з аргументами:', args);
+            printLog('INFO', 'Старт функції', args);
 
             try {
                 const result = fn(...args);
                 
                 if (result instanceof Promise) {
                     return result.then(res => {
-                        printLog('INFO', 'Успішно завершилася:', res);
+                        printLog('INFO', 'Завершено (Promise)', res);
                         return res;
                     }).catch(err => {
-                        printLog('ERROR', 'Помилка промісу:', err.message);
+                        printLog('ERROR', 'Помилка (Promise)', err.message);
                         throw err;
                     });
                 }
 
-                printLog('INFO', 'Успішно завершилася:', result);
+                printLog('INFO', 'Завершено (Sync)', result);
                 return result;
             } catch (error) {
-                printLog('ERROR', 'Викинула виняток:', error.message);
+                printLog('ERROR', 'Помилка (Sync)', error.message);
                 throw error;
             }
         };
